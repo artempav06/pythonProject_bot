@@ -4,6 +4,7 @@
 
 
 import logging
+from credentials import *
 
 from telegram import Update
 from telegram import InlineKeyboardButton
@@ -15,6 +16,8 @@ from telegram.ext import CallbackQueryHandler
 import datetime
 import pytz
 # Enable logging
+import database
+
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO
 )
@@ -62,31 +65,24 @@ def get_money(update: Update, _: CallbackContext):
         )
 
 
-# def get_current_money():
-#     currency = ["BTC", "ETH", "USD", "EUR", "CNY"]
-#     result = ""
-#     for item in currency:
-#         r = requests.get(f"https://pokur.su/{item}/rub/1/")
-#         soup = BeautifulSoup(r.text, 'lxml')
-#         val = soup.find("div", attrs={"class": "blockquote-classic"}).text.strip()
-#         result += f"{val}\n"
-#     return result
-
-
 def morning(context: CallbackContext):
-    context.bot.send_message(
-        chat_id='970825811',
-        text=amogus(),
-        reply_markup=button()
-    )
+    ids = database.get_id()
+    for id in ids:
+        context.bot.send_message(
+            chat_id=id,
+            text=amogus(),
+            reply_markup=button()
+        )
 
 
 def evening(context: CallbackContext):
-    context.bot.send_message(
-        chat_id='970825811',
-        text=amogus(),
-        reply_markup=button()
-    )
+    ids = database.get_id()
+    for id in ids:
+        context.bot.send_message(
+            chat_id=id,
+            text=amogus(),
+            reply_markup=button()
+        )
 
 
 # Define a few command handlers. These usually take the two arguments update and
@@ -114,8 +110,13 @@ def start(update: Update, context: CallbackContext) -> None:
                 tzinfo=pytz.timezone('Europe/Moscow')
             )
         )
+    ids = database.get_id()
+    if update.effective_user.id in ids:
+        pass
+    else:
+        database.insert_into_db(update.effective_user.id)
     update.message.reply_text(
-        text="The Witcher 😁😁",
+        text="Hey, I am a cripto_bot 😎",
         reply_markup=button()
     )
     logging.getLogger().info(update.effective_user.id)
@@ -124,8 +125,7 @@ def start(update: Update, context: CallbackContext) -> None:
 def main() -> None:
     """Start the bot."""
     # Create the Updater and pass it your bot's token.
-    updater = Updater("1821046532:AAHFNepY7ofque47KukDiE-H_hNPBZhL0c8")
-    # updater = Updater("1806989967:AAHou2uI1Nhu-Xu4d84NSBpBYz6xSTVFRco")
+    updater = Updater(token)
 
     button_handler = CallbackQueryHandler(callback=get_money)
 
